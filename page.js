@@ -1,6 +1,10 @@
 // Dynamically import the SDK from the CDN
 import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js')
-  .then(() => {    
+  .then(() => {
+    // Use wrapModule to instantiate the wrapped version of the module
+    window.WrappedkartaPOIAppHandler = wrapModule(window, 'kartaPOIAppHandler');
+
+    // Function to build the page dynamically
     function buildPage() {
       // Create and append title
       const title = document.createElement('h1');
@@ -39,7 +43,7 @@ import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js
       // Handle button click events
       document.getElementById('getTokenBtn').addEventListener('click', async function() {
         try {
-          const response = await window.kartaPOIAppHandler.invoke('GetToken', {});
+          const response = await window.WrappedkartaPOIAppHandler.invoke('GetToken', {});
           resultPara.textContent = `Token: ${response.result}`;
         } catch (error) {
           resultPara.textContent = `Error: ${error.message}`;
@@ -48,7 +52,7 @@ import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js
 
       document.getElementById('getAppDataBtn').addEventListener('click', async function() {
         try {
-          const response = await window.kartaPOIAppHandler.invoke('GetAppData', {});
+          const response = await window.WrappedkartaPOIAppHandler.invoke('GetAppData', {});
           resultPara.textContent = `App Data: ${JSON.stringify(response.result)}`;
         } catch (error) {
           resultPara.textContent = `Error: ${error.message}`;
@@ -57,7 +61,7 @@ import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js
 
       document.getElementById('closeDetailBtn').addEventListener('click', async function() {
         try {
-          const response = await window.kartaPOIAppHandler.invoke('CloseDetail', { bySubmission: true });
+          const response = await window.WrappedkartaPOIAppHandler.invoke('CloseDetail', { bySubmission: true });
           resultPara.textContent = `Detail Closed: ${JSON.stringify(response.result)}`;
         } catch (error) {
           resultPara.textContent = `Error: ${error.message}`;
@@ -65,7 +69,7 @@ import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js
       });
     }
 
-    // Build the page once the SDK is loaded
+    // Build the page once the SDK is loaded and wrapped
     buildPage();
   })
   .catch((error) => {
