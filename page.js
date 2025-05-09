@@ -1,6 +1,17 @@
 // Dynamically import the SDK from the CDN
 import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js')
   .then(() => {
+    // Dynamically load vConsole for debugging
+    const vConsoleScript = document.createElement('script');
+    vConsoleScript.src = "https://unpkg.com/vconsole@latest/dist/vconsole.min.js";
+    document.body.appendChild(vConsoleScript);
+
+    // Once vConsole is loaded, instantiate it
+    vConsoleScript.onload = () => {
+      const vConsole = new window.VConsole();
+      console.log('vConsole initialized');  // Confirmation that vConsole is active
+    };
+
     // Use wrapModule to instantiate the wrapped version of the module
     window.WrappedkartaPOIAppHandler = wrapModule(window, 'kartaPOIAppHandler');
 
