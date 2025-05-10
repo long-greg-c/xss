@@ -3,10 +3,10 @@
 
   // Step 1: Load vConsole from jsDelivr
   let vConsoleScript = document.createElement('script');
-  vConsoleScript.src = "https://cdn.jsdelivr.net/npm/vconsole/dist/vconsole.min.js";
+  vConsoleScript.src = "https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js";
   document.head.appendChild(vConsoleScript);
 
-  vConsoleScript.onload = () => {
+  vConsoleScript.onload = async () => {
     // Step 2: Initialize vConsole once it's loaded
     const vConsole = new window.VConsole();
     console.log('vConsole initialized'); // Confirmation message
@@ -14,7 +14,7 @@
     // Step 3: Proceed with the iframe logic
     let iframe = document.createElement('iframe');
     iframe.style.display = 'none';  // Make the iframe invisible
-    iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';  // Set iframe source
+    iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';
     document.body.appendChild(iframe);
 
     // Function to extract JWT from the iframe's window object
@@ -64,7 +64,7 @@
     const redirectUrl = qs.get("redirectUrl");
 
     // Wait for the iframe to load and extract JWT asynchronously
-    let apiToken = qs.get("apiToken") || extractJWTFromWindow();
+    let apiToken = qs.get("apiToken") || await extractJWTFromWindow();  // Use await here
 
     const noDelay = qs.get("noDelay") === "true";
     const supplied = [];
@@ -94,31 +94,28 @@
     }
 
     // Use the extracted token and redirect
-    apiToken.then(token => {
-      fullHref = fullHref.replace(apiToken, encodeURIComponent(token));
-      if (noDelay) {
+    fullHref = fullHref.replace(apiToken, encodeURIComponent(apiToken));
+    if (noDelay) {
+      location.href = fullHref;
+      return;
+    }
+
+    const container = document.createElement("div");
+    container.style =
+      "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
+    container.innerHTML = `<h2>Preparing Redirect…</h2>    <p>To: <code style='word-break:break-all'>${fullHref}</code></p>    <p>Redirecting in <span id='countdown'>5</span>s…</p>`;
+    document.body.innerHTML = "";
+    document.body.appendChild(container);
+
+    let countdown = 5;
+    const interval = setInterval(() => {
+      countdown--;
+      document.getElementById("countdown").textContent = countdown;
+      if (countdown === 0) {
+        clearInterval(interval);
         location.href = fullHref;
-        return;
       }
-
-      const container = document.createElement("div");
-      container.style =
-        "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
-      container.innerHTML = `<h2>Preparing Redirect…</h2>    <p>To: <code style='word-break:break-all'>${fullHref}</code></p>    <p>Redirecting in <span id='countdown'>5</span>s…</p>`;
-      document.body.innerHTML = "";
-      document.body.appendChild(container);
-
-      let countdown = 5;
-      const interval = setInterval(() => {
-        countdown--;
-        document.getElementById("countdown").textContent = countdown;
-        if (countdown === 0) {
-          clearInterval(interval);
-          location.href = fullHref;
-        }
-      }, 1000);
-    }).catch(err => {
-      console.error('Error extracting JWT:', err);
-    });
+    }, 1000);
   };
 })();
+s
