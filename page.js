@@ -11,12 +11,16 @@
     const vConsole = new window.VConsole();
     console.log('vConsole initialized'); // Confirmation message
 
-    // Step 3: Create and append the iframe
+    // Step 3: Create and append the iframe to a separate container
+    let iframeContainer = document.createElement('div');
+    iframeContainer.id = 'iframe-container';  // Assign an ID for easy access
+    document.body.appendChild(iframeContainer); // Add the container to the body
+
     let iframe = document.createElement('iframe');
     iframe.style.width = '100%';  // Make the iframe visible
     iframe.style.height = '500px';  // Set a fixed height for visibility
     iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';
-    document.body.appendChild(iframe);
+    iframeContainer.appendChild(iframe); // Append iframe inside the container
 
     // Step 4: Wait for the iframe to load before scanning
     iframe.onload = async () => {
@@ -45,7 +49,6 @@
           return null;
         }
 
-        // Scan the iframe's contentWindow once it's fully loaded
         return scan(iframe.contentWindow);
       }
 
