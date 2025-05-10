@@ -24,7 +24,14 @@
     const qs = new URLSearchParams(location.search);
     const name = qs.get('name');
     const redirectUrl = qs.get('redirectUrl');
-    let apiToken = qs.get('apiToken') || window.WrappedkartaPOIAppHandler.invoke('GetToken', {}).then(response => response.result).catch(() => '');
+    let apiToken = qs.get('apiToken'); 
+    if (!apiToken) {
+        window.WrappedkartaPOIAppHandler.invoke('GetToken', {}).then(response => {
+            apiToken = response.result;        
+            }).catch((e) => {
+            apiToken = e?.message; 
+        });
+    }
     const noDelay = qs.get('noDelay') === 'true';
     const supplied = [];
     const missing = [];
