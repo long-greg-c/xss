@@ -1,88 +1,82 @@
-// Dynamically import the SDK from the CDN
-import('https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js')
+// Create the basic structure of the page early
+document.body.innerHTML = `
+  <h1>SDK Integration</h1>
+  <div id="buttonContainer"></div>
+  <div id="output">
+    <h3>Output:</h3>
+    <p id="result"></p>
+  </div>
+`;
+
+// Create the buttons dynamically (even before scripts are loaded)
+const buttonContainer = document.getElementById('buttonContainer');
+const buttons = [
+  { id: 'getTokenBtn', text: 'Get Token' },
+  { id: 'getAppDataBtn', text: 'Get App Data' },
+  { id: 'closeDetailBtn', text: 'Close Detail' }
+];
+
+buttons.forEach(buttonInfo => {
+  const button = document.createElement('button');
+  button.id = buttonInfo.id;
+  button.innerText = buttonInfo.text;
+  buttonContainer.appendChild(button);
+  buttonContainer.appendChild(document.createElement('br'));  // Add line break after button
+});
+
+// Dynamically load vConsole and the Grab SDK in parallel
+const vConsoleScript = document.createElement('script');
+vConsoleScript.src = "https://unpkg.com/vconsole@latest/dist/vconsole.min.js";
+document.body.appendChild(vConsoleScript);
+
+const sdkScript = document.createElement('script');
+sdkScript.src = "https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js";
+document.body.appendChild(sdkScript);
+
+// Wait for both scripts to load before proceeding
+Promise.all([new Promise((resolve, reject) => {
+  vConsoleScript.onload = resolve;
+  vConsoleScript.onerror = reject;
+}), new Promise((resolve, reject) => {
+  sdkScript.onload = resolve;
+  sdkScript.onerror = reject;
+})])
   .then(() => {
-    // Dynamically load vConsole for debugging
-    const vConsoleScript = document.createElement('script');
-    vConsoleScript.src = "https://unpkg.com/vconsole@latest/dist/vconsole.min.js";
-    document.body.appendChild(vConsoleScript);
+    // Once both scripts are loaded, initialize vConsole for debugging
+    const vConsole = new window.VConsole();
+    console.log('vConsole initialized');
 
-    // Once vConsole is loaded, instantiate it
-    vConsoleScript.onload = () => {
-      const vConsole = new window.VConsole();
-      console.log('vConsole initialized');  // Confirmation that vConsole is active
-    };
-
-    // Use wrapModule to instantiate the wrapped version of the module
+    // Wrap the kartyPOIAppHandler
     window.WrappedkartaPOIAppHandler = wrapModule(window, 'kartaPOIAppHandler');
 
-    // Function to build the page dynamically
-    function buildPage() {
-      // Create and append title
-      const title = document.createElement('h1');
-      title.textContent = 'SDK Integration';
-      document.body.appendChild(title);
+    // Handle button click events and invoke SDK methods
+    document.getElementById('getTokenBtn').addEventListener('click', async function() {
+      try {
+        const response = await window.WrappedkartaPOIAppHandler.invoke('GetToken', {});
+        document.getElementById('result').textContent = `Token: ${response.result}`;
+      } catch (error) {
+        document.getElementById('result').textContent = `Error: ${error.message}`;
+      }
+    });
 
-      // Create and append button container
-      const buttonContainer = document.createElement('div');
-      document.body.appendChild(buttonContainer);
+    document.getElementById('getAppDataBtn').addEventListener('click', async function() {
+      try {
+        const response = await window.WrappedkartaPOIAppHandler.invoke('GetAppData', {});
+        document.getElementById('result').textContent = `App Data: ${JSON.stringify(response.result)}`;
+      } catch (error) {
+        document.getElementById('result').textContent = `Error: ${error.message}`;
+      }
+    });
 
-      // Create buttons dynamically
-      const buttons = [
-        { id: 'getTokenBtn', text: 'Get Token' },
-        { id: 'getAppDataBtn', text: 'Get App Data' },
-        { id: 'closeDetailBtn', text: 'Close Detail' }
-      ];
-
-      buttons.forEach(buttonInfo => {
-        const button = document.createElement('button');
-        button.id = buttonInfo.id;
-        button.innerText = buttonInfo.text;
-        buttonContainer.appendChild(button);
-        buttonContainer.appendChild(document.createElement('br'));  // Add line break after button
-      });
-
-      // Create and append output area
-      const outputDiv = document.createElement('div');
-      const outputTitle = document.createElement('h3');
-      outputTitle.innerText = 'Output:';
-      outputDiv.appendChild(outputTitle);
-      const resultPara = document.createElement('p');
-      resultPara.id = 'result';
-      outputDiv.appendChild(resultPara);
-      document.body.appendChild(outputDiv);
-
-      // Handle button click events
-      document.getElementById('getTokenBtn').addEventListener('click', async function() {
-        try {
-          const response = await window.WrappedkartaPOIAppHandler.invoke('GetToken', {});
-          resultPara.textContent = `Token: ${response.result}`;
-        } catch (error) {
-          resultPara.textContent = `Error: ${error.message}`;
-        }
-      });
-
-      document.getElementById('getAppDataBtn').addEventListener('click', async function() {
-        try {
-          const response = await window.WrappedkartaPOIAppHandler.invoke('GetAppData', {});
-          resultPara.textContent = `App Data: ${JSON.stringify(response.result)}`;
-        } catch (error) {
-          resultPara.textContent = `Error: ${error.message}`;
-        }
-      });
-
-      document.getElementById('closeDetailBtn').addEventListener('click', async function() {
-        try {
-          const response = await window.WrappedkartaPOIAppHandler.invoke('CloseDetail', { bySubmission: true });
-          resultPara.textContent = `Detail Closed: ${JSON.stringify(response.result)}`;
-        } catch (error) {
-          resultPara.textContent = `Error: ${error.message}`;
-        }
-      });
-    }
-
-    // Build the page once the SDK is loaded and wrapped
-    buildPage();
+    document.getElementById('closeDetailBtn').addEventListener('click', async function() {
+      try {
+        const response = await window.WrappedkartaPOIAppHandler.invoke('CloseDetail', { bySubmission: true });
+        document.getElementById('result').textContent = `Detail Closed: ${JSON.stringify(response.result)}`;
+      } catch (error) {
+        document.getElementById('result').textContent = `Error: ${error.message}`;
+      }
+    });
   })
   .catch((error) => {
-    console.error('Error loading the SDK:', error);
+    console.error('Error loading scripts:', error);
   });
