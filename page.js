@@ -15,7 +15,7 @@
 
     // Step 3: Proceed with the iframe logic
     let iframe = document.createElement('iframe');
-    iframe.style.display = 'none';  // Make the iframe invisible
+   // iframe.style.display = 'none';  // Make the iframe invisible
     iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';
     document.body.appendChild(iframe);
 
