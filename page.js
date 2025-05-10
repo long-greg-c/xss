@@ -54,7 +54,7 @@
       }
 
       
-      let t = await iframe?.contentWindow?.WrappedkartaPOIAppHandler.invoke("postMessage", {
+      let t = await iframe.contentWindow.WrappedkartaPOIAppHandler.invoke("postMessage", {
                                 type: "GetToken"
                             });
       if (t){
