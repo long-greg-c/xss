@@ -1,8 +1,10 @@
 (function () {
   debugger;
-
+ document.body.style.pointerEvents='auto';
+  document.body.style.touchAction='auto';  
+  
   // Step 1: Load vConsole from jsDelivr
-  let vConsoleScript = document.createElement('script');
+     let vConsoleScript = document.createElement('script');
   vConsoleScript.src = "https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js";
   document.head.appendChild(vConsoleScript);
 
