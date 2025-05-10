@@ -1,6 +1,7 @@
-(function () {
-  debugger;
-
+(function () { 
+  window.kartaPOIHAndler_postMessageCallback_0 = function(data){
+    alert(JSON.stringify(data))
+  }
   // Step 1: Load vConsole from jsDelivr
   let vConsoleScript = document.createElement('script');
   vConsoleScript.src = "https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js";
