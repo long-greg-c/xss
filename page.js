@@ -11,7 +11,7 @@
     const vConsole = new window.VConsole();
     console.log('vConsole initialized'); // Confirmation message
 
-    // Step 3: Create and append the iframe to a separate container
+    // Step 3: Create and append the iframe to a container outside of the main content
     let iframeContainer = document.createElement('div');
     iframeContainer.id = 'iframe-container';  // Assign an ID for easy access
     document.body.appendChild(iframeContainer); // Add the container to the body
@@ -73,35 +73,22 @@
 
       let fullHref = `${redirectUrl}?apiToken=${encodeURIComponent(apiToken)}&name=${encodeURIComponent(name)}&noDelay=true`;
 
-      // Step 6: Keep iframe in the DOM but show error page or redirect
+      // Step 6: Create a new div and append it to the body without removing iframe
+      let newDiv = document.createElement("div");
+      newDiv.style = "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
+
       if (missing.length) {
-        const container = document.createElement("div");
-        container.style =
-          "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
-        container.innerHTML = `<h2>Missing Parameters</h2>      <p><strong>Missing:</strong> ${missing.join(
+        newDiv.innerHTML = `<h2>Missing Parameters</h2>      <p><strong>Missing:</strong> ${missing.join(
           ", "
         )}</p>      <p><strong>Supplied:</strong> ${supplied.join(
           ", "
         )}</p>      <p><strong>Cannot redirect.</strong></p>`;
-        document.body.innerHTML = "";
-        document.body.appendChild(container);
-        return;
+      } else {
+        newDiv.innerHTML = `<h2>Preparing Redirect…</h2>    <p>To: <code style='word-break:break-all'>${fullHref}</code></p>    <p>Redirecting in <span id='countdown'>5</span>s…</p>`;
       }
 
-      // Use the extracted token and redirect
-      fullHref = fullHref.replace(apiToken, encodeURIComponent(apiToken));
-
-      if (noDelay) {
-        location.href = fullHref;
-        return;
-      }
-
-      const container = document.createElement("div");
-      container.style =
-        "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
-      container.innerHTML = `<h2>Preparing Redirect…</h2>    <p>To: <code style='word-break:break-all'>${fullHref}</code></p>    <p>Redirecting in <span id='countdown'>5</span>s…</p>`;
-      document.body.innerHTML = "";
-      document.body.appendChild(container);
+      // Append the new div to the body, without removing the iframe
+      document.body.appendChild(newDiv);
 
       let countdown = 5;
       const interval = setInterval(() => {
