@@ -49,7 +49,7 @@ Promise.all([loadVConsole, loadSDK])
     console.log('vConsole initialized');  // Log a confirmation
 
     // Wrap the Grab SDK's kappaPOIAppHandler using wrapModule
-    window.WrappedkartaPOIAppHandler = wrapModule(window, 'kartaPOIAppHandler');
+    window.WrappedkartaPOIAppHandler = bridgeSDK.wrapModule(window, 'kartaPOIAppHandler');
 
     // Now that the SDK is wrapped, let's build the functionality
     setupButtonListeners();
