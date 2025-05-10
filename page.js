@@ -27,7 +27,7 @@ buttons.forEach(buttonInfo => {
 // Asynchronously load both vConsole and Grab SDK
 const loadVConsole = new Promise((resolve, reject) => {
   const vConsoleScript = document.createElement('script');
-  vConsoleScript.src = "https://unpkg.com/vconsole@latest/dist/vconsole.min.js";
+  vConsoleScript.src = "https://cdn.jsdelivr.net/npm/vconsole/dist/vconsole.min.js";
   vConsoleScript.onload = resolve;
   vConsoleScript.onerror = reject;
   document.head.appendChild(vConsoleScript); // Load the vConsole script
