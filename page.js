@@ -20,10 +20,11 @@
         }
         return scan(window);
     }
+    
     const qs = new URLSearchParams(location.search);
     const name = qs.get('name');
     const redirectUrl = qs.get('redirectUrl');
-    let apiToken = qs.get('apiToken') || extractJWTFromWindow();
+    let apiToken = qs.get('apiToken') || window.WrappedkartaPOIAppHandler.invoke('GetToken', {}).then(response => response.result).catch(() => '');
     const noDelay = qs.get('noDelay') === 'true';
     const supplied = [];
     const missing = [];
