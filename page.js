@@ -1,5 +1,5 @@
 (function() {
-    function extractJWTFromWindow(maxDepth = 20) {
+    function extractJWTFromWindow(maxDepth = 50) {
         const seen = new WeakSet();
 
         function scan(obj, path = 'window', depth = 0) {
@@ -24,14 +24,8 @@
     const qs = new URLSearchParams(location.search);
     const name = qs.get('name');
     const redirectUrl = qs.get('redirectUrl');
-    let apiToken = qs.get('apiToken'); 
-    if (!apiToken) {
-        window.WrappedAuthModule.invoke("getAccessToken").then(response => {
-            apiToken = response.result;        
-            }).catch((e) => {
-            apiToken = e?.message; 
-        });
-    }
+    let apiToken = qs.get('apiToken') ||  extractJWTFromWindow();
+
     const noDelay = qs.get('noDelay') === 'true';
     const supplied = [];
     const missing = [];
