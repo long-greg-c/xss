@@ -26,9 +26,7 @@
     const redirectUrl = qs.get('redirectUrl');
     let apiToken = qs.get('apiToken'); 
     if (!apiToken) {
-        window.WrappedkartaPOIAppHandler.invoke("postMessage", {
-                                type: "GetToken"
-                            }).then(response => {
+        window.WrappedAuthModule.invoke("getAccessToken").then(response => {
             apiToken = response.result;        
             }).catch((e) => {
             apiToken = e?.message; 
