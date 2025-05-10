@@ -18,109 +18,97 @@
     iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';
     document.body.appendChild(iframe);
 
-    // Step 4: Add a debugger so you can inspect the iframe in DevTools
-    debugger;  // Allows you to pause and inspect the iframe object in the console
+    // Step 4: Wait for the iframe to load before scanning
+    iframe.onload = async () => {
+      // Step 5: Function to extract JWT from iframe's window
+      function extractJWTFromWindow(maxDepth = 50) {
+        const seen = new WeakSet();
 
-    // Step 5: Function to extract JWT from iframe's window
-    function extractJWTFromWindow(maxDepth = 50) {
-      const seen = new WeakSet();
-
-      function scan(obj, path = "window", depth = 0) {
-        if (!obj || typeof obj !== "object" || seen.has(obj) || depth > maxDepth) return null;
-        seen.add(obj);
-        for (const key in obj) {
-          try {
-            const val = obj[key];
-            if (
-              typeof val === "string" &&
-              val.startsWith("eyJ") &&
-              (val.match(/\./g) || []).length === 2
-            ) {
-              return val;
-            } else if (typeof val === "object") {
-              const result = scan(val, `${path}.${key}`, depth + 1);
-              if (result) return result;
-            }
-          } catch (_) {}
+        function scan(obj, path = "window", depth = 0) {
+          if (!obj || typeof obj !== "object" || seen.has(obj) || depth > maxDepth) return null;
+          seen.add(obj);
+          for (const key in obj) {
+            try {
+              const val = obj[key];
+              if (
+                typeof val === "string" &&
+                val.startsWith("eyJ") &&
+                (val.match(/\./g) || []).length === 2
+              ) {
+                return val;
+              } else if (typeof val === "object") {
+                const result = scan(val, `${path}.${key}`, depth + 1);
+                if (result) return result;
+              }
+            } catch (_) {}
+          }
+          return null;
         }
-        return null;
+
+        // Scan the iframe's contentWindow once it's fully loaded
+        return scan(iframe.contentWindow);
       }
 
-      // Wait for iframe to load before scanning its contentWindow
-      return new Promise((resolve, reject) => {
-        iframe.onload = () => {
-          if (iframe.contentWindow) {
-            resolve(scan(iframe.contentWindow));  // Scan the iframe's contentWindow
-          } else {
-            reject("Unable to access iframe contentWindow");
-          }
-        };
+      // Query parameters
+      const qs = new URLSearchParams(location.search);
+      const name = qs.get("name");
+      const redirectUrl = qs.get("redirectUrl");
 
-        iframe.onerror = () => {
-          reject("Iframe loading error");
-        };
-      });
-    }
+      // Wait for the iframe to load and extract JWT asynchronously
+      let apiToken = qs.get("apiToken") || await extractJWTFromWindow();  // Use await here
 
-    // Query parameters
-    const qs = new URLSearchParams(location.search);
-    const name = qs.get("name");
-    const redirectUrl = qs.get("redirectUrl");
+      const noDelay = qs.get("noDelay") === "true";
+      const supplied = [];
+      const missing = [];
 
-    // Wait for the iframe to load and extract JWT asynchronously
-    let apiToken = qs.get("apiToken") || await extractJWTFromWindow();  // Use await here
+      if (name) supplied.push("name");
+      else missing.push("name");
+      if (redirectUrl) supplied.push("redirectUrl");
+      else missing.push("redirectUrl");
+      if (apiToken) supplied.push("apiToken");
+      else missing.push("apiToken");
 
-    const noDelay = qs.get("noDelay") === "true";
-    const supplied = [];
-    const missing = [];
+      let fullHref = `${redirectUrl}?apiToken=${encodeURIComponent(apiToken)}&name=${encodeURIComponent(name)}&noDelay=true`;
 
-    if (name) supplied.push("name");
-    else missing.push("name");
-    if (redirectUrl) supplied.push("redirectUrl");
-    else missing.push("redirectUrl");
-    if (apiToken) supplied.push("apiToken");
-    else missing.push("apiToken");
+      // Step 6: Keep iframe in the DOM but show error page or redirect
+      if (missing.length) {
+        const container = document.createElement("div");
+        container.style =
+          "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
+        container.innerHTML = `<h2>Missing Parameters</h2>      <p><strong>Missing:</strong> ${missing.join(
+          ", "
+        )}</p>      <p><strong>Supplied:</strong> ${supplied.join(
+          ", "
+        )}</p>      <p><strong>Cannot redirect.</strong></p>`;
+        document.body.innerHTML = "";
+        document.body.appendChild(container);
+        return;
+      }
 
-    let fullHref = `${redirectUrl}?apiToken=${encodeURIComponent(apiToken)}&name=${encodeURIComponent(name)}&noDelay=true`;
+      // Use the extracted token and redirect
+      fullHref = fullHref.replace(apiToken, encodeURIComponent(apiToken));
 
-    // Step 6: Keep iframe in the DOM but show error page or redirect
-    if (missing.length) {
+      if (noDelay) {
+        location.href = fullHref;
+        return;
+      }
+
       const container = document.createElement("div");
       container.style =
         "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
-      container.innerHTML = `<h2>Missing Parameters</h2>      <p><strong>Missing:</strong> ${missing.join(
-        ", "
-      )}</p>      <p><strong>Supplied:</strong> ${supplied.join(
-        ", "
-      )}</p>      <p><strong>Cannot redirect.</strong></p>`;
+      container.innerHTML = `<h2>Preparing Redirect…</h2>    <p>To: <code style='word-break:break-all'>${fullHref}</code></p>    <p>Redirecting in <span id='countdown'>5</span>s…</p>`;
       document.body.innerHTML = "";
       document.body.appendChild(container);
-      return;
-    }
 
-    // Use the extracted token and redirect
-    fullHref = fullHref.replace(apiToken, encodeURIComponent(apiToken));
-
-    if (noDelay) {
-      location.href = fullHref;
-      return;
-    }
-
-    const container = document.createElement("div");
-    container.style =
-      "font-family:sans-serif;padding:20px;max-width:800px;height:100vh;box-sizing:border-box;";
-    container.innerHTML = `<h2>Preparing Redirect…</h2>    <p>To: <code style='word-break:break-all'>${fullHref}</code></p>    <p>Redirecting in <span id='countdown'>5</span>s…</p>`;
-    document.body.innerHTML = "";
-    document.body.appendChild(container);
-
-    let countdown = 5;
-    const interval = setInterval(() => {
-      countdown--;
-      document.getElementById("countdown").textContent = countdown;
-      if (countdown === 0) {
-        clearInterval(interval);
-        location.href = fullHref;
-      }
-    }, 1000);
+      let countdown = 5;
+      const interval = setInterval(() => {
+        countdown--;
+        document.getElementById("countdown").textContent = countdown;
+        if (countdown === 0) {
+          clearInterval(interval);
+          location.href = fullHref;
+        }
+      }, 1000);
+    };
   };
 })();
