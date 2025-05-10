@@ -24,32 +24,15 @@ buttons.forEach(buttonInfo => {
   buttonContainer.appendChild(document.createElement('br'));  // Add line break after button
 });
 
-// Dynamically load vConsole and the Grab SDK in parallel
-const vConsoleScript = document.createElement('script');
-vConsoleScript.src = "https://unpkg.com/vconsole@latest/dist/vconsole.min.js";
-document.body.appendChild(vConsoleScript);
-
-const sdkScript = document.createElement('script');
-sdkScript.src = "https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js";
+import("https://cdn.jsdelivr.net/npm/vconsole/dist/vconsole.min.js");
+import("https://cdn.jsdelivr.net/npm/@grabjs/mobile-kit-bridge-sdk/dist/index.js");
 document.body.appendChild(sdkScript);
 
-// Wait for both scripts to load before proceeding
-Promise.all([new Promise((resolve, reject) => {
-  vConsoleScript.onload = resolve;
-  vConsoleScript.onerror = reject;
-}), new Promise((resolve, reject) => {
-  sdkScript.onload = resolve;
-  sdkScript.onerror = reject;
-})])
-  .then(() => {
-    // Once both scripts are loaded, initialize vConsole for debugging
-    const vConsole = new window.VConsole();
+const vConsole = new window.VConsole();
     console.log('vConsole initialized');
 
-    // Wrap the kartyPOIAppHandler
     window.WrappedkartaPOIAppHandler = wrapModule(window, 'kartaPOIAppHandler');
 
-    // Handle button click events and invoke SDK methods
     document.getElementById('getTokenBtn').addEventListener('click', async function() {
       try {
         const response = await window.WrappedkartaPOIAppHandler.invoke('GetToken', {});
@@ -76,7 +59,4 @@ Promise.all([new Promise((resolve, reject) => {
         document.getElementById('result').textContent = `Error: ${error.message}`;
       }
     });
-  })
-  .catch((error) => {
-    console.error('Error loading scripts:', error);
-  });
+ 
