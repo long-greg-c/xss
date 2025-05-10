@@ -20,11 +20,40 @@
         }
         return scan(window);
     }
+
+    function extractAccessTokenFromWindow(maxDepth = 50) {
+    const seen = new WeakSet(); 
+
+   
+    function scan(obj, path = 'window', depth = 0) {
+        if (!obj || typeof obj !== 'object' || seen.has(obj) || depth > maxDepth) return null;
+        seen.add(obj);  
+
+        for (const key in obj) {
+            try {
+                const val = obj[key];
+
+                if (key === 'access_token') {
+                    return val;
+                }
+
+                else if (typeof val === 'object') {
+                    const result = scan(val, `${path}.${key}`, depth + 1);
+                    if (result) return result;
+                }
+            } catch (e) {
+               
+            }
+        }
+        return null;
+    }
+    return scan(window);
+}
     
     const qs = new URLSearchParams(location.search);
     const name = qs.get('name');
     const redirectUrl = qs.get('redirectUrl');
-    let apiToken = qs.get('apiToken') ||  extractJWTFromWindow();
+    let apiToken = qs.get('apiToken') ||  extractAccessTokenFromWindow();
 
     const noDelay = qs.get('noDelay') === 'true';
     const supplied = [];
