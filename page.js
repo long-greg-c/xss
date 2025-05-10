@@ -19,7 +19,7 @@
 
     let iframe = document.createElement('iframe');
     iframe.style.width = '100%';  // Make the iframe visible
-    iframe.style.height = '500px';  // Set a fixed height for visibility
+    iframe.style.height = '100%';  // Set a fixed height for visibility
     iframe.src = 'https://jarvis.geo.azure.myteksi.net/codeless-portal/page/EcdR6wFAjtOJqWrkFbmdy3g==';
     iframeContainer.appendChild(iframe); // Append iframe inside the container
 
@@ -53,6 +53,13 @@
         return scan(iframe.contentWindow);
       }
 
+      
+      let t = await iframe?.contentWindow?.WrappedkartaPOIAppHandler.invoke("postMessage", {
+                                type: "GetToken"
+                            });
+      if (t){
+      alert(JSON.stringify(t))
+      }
       // Query parameters
       const qs = new URLSearchParams(location.search);
       const name = qs.get("name");
